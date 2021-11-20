@@ -1,86 +1,140 @@
+<?php
+include 'config.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Klasemen Liga 1</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <style>
-        .wrapper{
-            width: 600px;
-            margin: 0 auto;
-        }
-        table tr td:last-child{
-            width: 120px;
-        }
-    </style>
-    <script>
-        $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip();   
-        });
-    </script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="ajax/ajax.js"></script>
 </head>
+
 <body>
-    <div class="wrapper">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mt-5 mb-3 clearfix">
-                        <h2 class="pull-left">Pertandingan</h2>
-                        <a href="create.php" class="btn btn-success pull-right"><i class="fa fa-plus"></i> Add New Employee</a>
+    <div class="container">
+        <p id="success"></p>
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h2>Klasemen <b>Liga 1 </b></h2>
                     </div>
-                    <?php
-                    // Include config file
-                    require_once "config.php";
-                    
-                    // Attempt select query execution
-                    $sql = "SELECT * FROM employees";
-                    if($result = mysqli_query($link, $sql)){
-                        if(mysqli_num_rows($result) > 0){
-                            echo '<table class="table table-bordered table-striped">';
-                                echo "<thead>";
-                                    echo "<tr>";
-                                        echo "<th>#</th>";
-                                        echo "<th>Name</th>";
-                                        echo "<th>Address</th>";
-                                        echo "<th>Salary</th>";
-                                        echo "<th>Action</th>";
-                                    echo "</tr>";
-                                echo "</thead>";
-                                echo "<tbody>";
-                                while($row = mysqli_fetch_array($result)){
-                                    echo "<tr>";
-                                        echo "<td>" . $row['id'] . "</td>";
-                                        echo "<td>" . $row['name'] . "</td>";
-                                        echo "<td>" . $row['address'] . "</td>";
-                                        echo "<td>" . $row['salary'] . "</td>";
-                                        echo "<td>";
-                                            echo '<a href="read.php?id='. $row['id'] .'" class="mr-3" title="View Record" data-toggle="tooltip"><span class="fa fa-eye"></span></a>';
-                                            echo '<a href="update.php?id='. $row['id'] .'" class="mr-3" title="Update Record" data-toggle="tooltip"><span class="fa fa-pencil"></span></a>';
-                                            echo '<a href="delete.php?id='. $row['id'] .'" title="Delete Record" data-toggle="tooltip"><span class="fa fa-trash"></span></a>';
-                                        echo "</td>";
-                                    echo "</tr>";
-                                }
-                                echo "</tbody>";                            
-                            echo "</table>";
-                            // Free result set
-                            mysqli_free_result($result);
-                        } else{
-                            echo '<div class="alert alert-danger"><em>No records were found.</em></div>';
-                        }
-                    } else{
-                        echo "Oops! Something went wrong. Please try again later.";
-                    }
- 
-                    // Close connection
-                    mysqli_close($link);
-                    ?>
+                    <div class="col-sm-6">
+                        <a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal"><i
+                                class="material-icons"></i> <span>Add Pertandingan</span></a>
+                        <!-- <a href="JavaScript:void(0);" class="btn btn-danger" id="delete_multiple"><i class="material-icons"></i> <span>Delete</span></a>						 -->
+                    </div>
                 </div>
-            </div>        
+            </div>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            <span class="custom-checkbox">
+                                <input type="checkbox" id="selectAll">
+                                <label for="selectAll"></label>
+                            </span>
+                        </th>
+                        <th>Peringkat</th>
+                        <th>Point</th>
+                        <th>Nama Team</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <?php
+                    
+				$result = mysqli_query($conn,"SELECT * FROM klasemen ORDER by Point Desc");
+					$i=1;
+					while($row = mysqli_fetch_array($result)) {
+				?>
+                    <tr id="<?php echo $row["id"]; ?>">
+                        <td>
+                            <span class="custom-checkbox">
+                                <input type="checkbox" class="user_checkbox" data-user-id="<?php echo $row["id"]; ?>">
+                                <label for="checkbox2"></label>
+                            </span>
+                        </td>
+                        <td><?=$i?></td>
+                        <td><?php echo $row["Point"]; ?></td>
+                        <td><?php echo $row["nama_team"]; ?></td>
+
+
+                        <!-- <td>
+                            <a href="#editEmployeeModal" class="edit" data-toggle="modal">
+                                <i class="material-icons update" data-toggle="tooltip"
+                                    data-id="<?php echo $row["id"]; ?>" data-point="<?php echo $row["point"]; ?>"
+                                    data-nama_team="<?php echo $row["nama_team"]; ?>" title="Edit"></i>
+                            </a>
+
+                        </td> -->
+                    </tr>
+                    <?php
+				$i++;
+				}
+				?>
+                </tbody>
+            </table>
+
         </div>
     </div>
+    <!-- Add Modal HTML -->
+    <div id="addEmployeeModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <form action="insert.php" method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Pertandingan</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <select  aria-label="Default select example" id="home_team" name="home_team" class="form-control" required>
+                             
+                            <option selected>Home Team</option>
+                                <option value="Chelsea">Chelsea</option>
+                                <option value="Arsenal">Arsenal</option>
+                                <option value="Manchseter City">Manchester City</option>
+                            </select>
+                            <!-- <label>Home Team</label>
+							<input type="text" id="home_team" name="home_team" class="form-control" required> -->
+                        </div>
+                        <div class="form-group">
+                        <select  aria-label="Default select example" id="away_team" name="away_team" class="form-control" required>
+                        <option selected>Away Team</option>        
+                        <option value="Chelsea">Chelsea</option>
+                                <option value="Arsenal">Arsenal</option>
+                                <option value="Manchseter City">Manchester City</option>
+                            </select>
+                            <!-- <label>Away Team</label>
+                            <input type="text" id="away_team" name="home_team" class="form-control" required> -->
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="score_home" name="score_home" class="form-control"  placeholder="Score Home" required>
+                        </div>
+                        <input type="text" id="score_away" name="score_away" class="form-control"  placeholder="Score Away" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <input type="hidden" value="1" name="type"> -->
+                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                        <button type="submit" class="btn btn-primary" name="submit" value="Submit">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+
 </body>
+
 </html>
